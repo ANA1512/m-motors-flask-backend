@@ -24,3 +24,19 @@ class Vehicule(db.Model):
             "description": self.description,
             "price": self.price
         }
+    
+class User(db.Model):
+    id : Mapped[int]=  mapped_column(primary_key=True)
+    name : Mapped[str] = mapped_column(unique=True)
+    email : Mapped[str] =  mapped_column(unique=True)
+    password: Mapped[str] = mapped_column()
+    role :Mapped[str] = mapped_column()
+
+    def to_register_user(self) :
+        return{
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "password": self.password,
+            "role":self.role
+        }
