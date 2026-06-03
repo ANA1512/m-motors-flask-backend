@@ -48,16 +48,21 @@ def index():
 @app.route("/register", methods =["GET","POST"])
 def register():
        if request.method == "POST":
-             hashed_password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
-             new_user = User(
+        email = request.form.get('email')
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user :
+                return jsonify({"message": "Cet email existe déjà"}),409
+
+        hashed_password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
+        new_user = User(
                 name = request.form.get('name'),
                 email = request.form.get('email'),
                 password = hashed_password,
                 role = request.form.get('role')
              )
-             db.session.add(new_user)
-             db.session.commit()
-             return jsonify({"message": "Utilisateur créé avec succès"}), 201
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"message": "Utilisateur créé avec succès"}), 201
 
 @app.route("/login",methods =[ "GET","POST"])
 def login():
