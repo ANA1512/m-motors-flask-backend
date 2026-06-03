@@ -48,17 +48,19 @@ def index():
 @app.route("/register", methods =["GET","POST"])
 def register():
        if request.method == "POST":
-        email = request.form.get('email')
+
+        data= request.get_json()
+        email = data.get('email')
         existing_user = User.query.filter_by(email=email).first()
         if existing_user :
                 return jsonify({"message": "Cet email existe déjà"}),409
 
-        hashed_password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
         new_user = User(
-                name = request.form.get('name'),
-                email = request.form.get('email'),
+                name = data.get('name'),
+                email = email,
                 password = hashed_password,
-                role = request.form.get('role')
+                role = data.get('role')
              )
         db.session.add(new_user)
         db.session.commit()
@@ -68,8 +70,8 @@ def register():
 def login():
        if request.method == "POST" :
           
-                email = request.form.get('email')
-                password = request.form.get('password')
+                email = request.json.get('email')
+                password = request.json.get('password')
                 user = User.query.filter_by(email=email).first()
 
                 if not user or not bcrypt.check_password_hash(user.password, password):
