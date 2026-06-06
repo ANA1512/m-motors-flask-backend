@@ -6,7 +6,7 @@ API REST Flask pour la plateforme de vente et location de véhicules M-Motors.
 
 - Python / Flask
 - SQLAlchemy
-- SQLite
+-PostgreSql
 - Flask-CORS
 
 ## Installation
