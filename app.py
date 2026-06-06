@@ -7,7 +7,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 load_dotenv()
-
+#routes protégées
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 #create the app
@@ -80,7 +81,13 @@ def login():
                 token = create_access_token(identity=str(user.id))
 
                 return jsonify({'token': token}), 200
-            
+
+@app.route("/mon-compte", methods=["GET"])
+@jwt_required()
+def mon_compte():
+       user_id = get_jwt_identity()
+       user = User.query.get(user_id)
+       return jsonify(user.to_dict()),200
 
 if __name__ == "__main__":
     app.run(port=5001, debug= True)

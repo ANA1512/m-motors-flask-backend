@@ -32,11 +32,10 @@ class User(db.Model):
     password: Mapped[str] = mapped_column()
     role :Mapped[str] = mapped_column()
 
-    def to_register_user(self) :
+    def to_dict(self) :
         return{
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "password": self.password,
             "role":self.role
         }
