@@ -1,8 +1,8 @@
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer,String, Float
+from sqlalchemy import Column, Integer,String, Float,ForeignKey
 
-from sqlalchemy.orm import Mapped, mapped_column,ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 #variable interact with db from any files
 db = SQLAlchemy()
@@ -30,17 +30,17 @@ class User(db.Model):
     name : Mapped[str] = mapped_column(unique=True)
     email : Mapped[str] =  mapped_column(unique=True)
     password: Mapped[str] = mapped_column()
-    role :Mapped[str] = mapped_column()
+    role: Mapped[str] = mapped_column(default="user")
 
     def to_dict(self) :
         return{
             "id": self.id,
             "name": self.name,
-            "email": self.email,
-            "role":self.role
+            "email": self.email
+            
         }
     
-class Dossier(db.model): 
+class Dossier(db.Model): 
     id : Mapped[int]=  mapped_column(primary_key=True)
     user_id : Mapped[int]=  mapped_column(ForeignKey("user.id"))
     vehicule_id : Mapped[int]=  mapped_column(ForeignKey("vehicule.id"))

@@ -67,7 +67,7 @@ def register():
         db.session.commit()
         return jsonify({"message": "Utilisateur créé avec succès"}), 201
 
-@app.route("/login",methods =[ "GET","POST"])
+@app.route("/login",methods =[ "POST"])
 def login():
        if request.method == "POST" :
           
@@ -109,14 +109,14 @@ def dossier() :
 
         return jsonify(new_dossier.to_dict()),201
 #read
-@app.route("/dossier/<id>", methods ="GET")
+@app.route("/dossier/<id>", methods=["GET"])
 @jwt_required()
 def show_files(id):
         response = Dossier.query.get(id)
         return jsonify(response.to_dict()),200
 
 #update
-@app.route("/dossier/<id>" , methods ="PUT")
+@app.route("/dossier/<id>" , methods =["PUT"])
 @jwt_required()
 def update_files(id):
         data= request.get_json()
@@ -130,7 +130,7 @@ def update_files(id):
         return jsonify(dossier_modify.to_dict()),200
 
 #delete
-@app.route("/dossier/<id>" , methods ="DELETE")
+@app.route("/dossier/<id>" , methods =["DELETE"])
 @jwt_required()
 def delete_files(id):
        
