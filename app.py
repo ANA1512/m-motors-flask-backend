@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 #import variable db
-from models.models import db , Vehicule, User
+from models.models import db , Vehicule, User,Dossier
 #import flask-cors
 from flask_cors import CORS
 #env variable
@@ -88,6 +88,24 @@ def mon_compte():
        user_id = get_jwt_identity()
        user = User.query.get(user_id)
        return jsonify(user.to_dict()),200
+
+@app.route("/dossier", methods =["POST"])
+@jwt_required()
+def dossier() :
+        data= request.get_json()
+        user_id =get_jwt_identity(),
+        new_dossier = Dossier(
+        user_id =user_id,
+        vehicule_id = data.get("vehicule_id"),
+        type_financement = data.get("type_financement"),
+        revenu_mensuel = data.get("revenu_mensuel"),
+        statut = data.get("statut")
+        )
+        db.session.add(new_dossier)
+        db.session.commit()
+
+        return jsonify(new_dossier.to_dict()),201
+        
 
 if __name__ == "__main__":
     app.run(port=5001, debug= True)
