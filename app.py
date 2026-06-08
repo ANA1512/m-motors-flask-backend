@@ -89,6 +89,9 @@ def mon_compte():
        user = User.query.get(user_id)
        return jsonify(user.to_dict()),200
 
+##files 
+
+#create 
 @app.route("/dossier", methods =["POST"])
 @jwt_required()
 def dossier() :
@@ -105,7 +108,38 @@ def dossier() :
         db.session.commit()
 
         return jsonify(new_dossier.to_dict()),201
-        
+#read
+@app.route("/dossier/<id>", methods ="GET")
+@jwt_required()
+def show_files(id):
+        response = Dossier.query.get(id)
+        return jsonify(response.to_dict()),200
+
+#update
+@app.route("/dossier/<id>" , methods ="PUT")
+@jwt_required()
+def update_files(id):
+        data= request.get_json()
+        dossier_modify = Dossier.query.get(id)
+        dossier_modify.vehicule_id = data.get("vehicule_id")
+        dossier_modify.type_financement = data.get("type_financement")
+        dossier_modify.revenu_mensuel = data.get("revenu_mensuel")
+        dossier_modify.statut = data.get("statut")
+       
+        db.session.commit()
+        return jsonify(dossier_modify.to_dict()),200
+
+#delete
+@app.route("/dossier/<id>" , methods ="DELETE")
+@jwt_required()
+def delete_files(id):
+       
+        dossier_delete = Dossier.query.get(id)
+        db.session.delete(dossier_delete)
+        db.session.commit()
+        return "",204 
+     
+
 
 if __name__ == "__main__":
     app.run(port=5001, debug= True)
