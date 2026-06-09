@@ -13,16 +13,26 @@ db = SQLAlchemy()
 
 class Vehicule(db.Model):
     id : Mapped[int]=  mapped_column(primary_key=True)
-    name : Mapped[str] = mapped_column(unique=True)
-    description :  Mapped[str]
-    price : Mapped[int]
+    name : Mapped[str] = mapped_column()
+    description :  Mapped[str]  = mapped_column()
+    price : Mapped[int]  = mapped_column()
+    type : Mapped[str] = mapped_column(default ="vente")
+    kilometrage : Mapped[int] =mapped_column(default = 0)
+    marque: Mapped[str] = mapped_column()
+    transmission : Mapped[str] = mapped_column()
+    places : Mapped[int] = mapped_column(default =5)
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "price": self.price
+            "price": self.price,
+            "type" : self.type,
+            "kilometrage" : self.kilometrage,
+            "marque" : self.marque,
+            "transmission" : self.transmission,
+            "places" : self.places
         }
     
 class User(db.Model):

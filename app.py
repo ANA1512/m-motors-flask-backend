@@ -46,6 +46,63 @@ def index():
         res= db.session.query(Vehicule).filter(Vehicule.name ==name).first()
         return jsonify(res.to_dict())
 
+
+#Post vehicule
+@app.route("/vehicule", methods =["POST"])
+@jwt_required()
+def create_vehicule():
+       data= request.get_json()
+       new_vehicule = Vehicule(
+        name = data.get("name"),
+        description = data.get("description"),
+        price = data.get("price"),
+        type = data.get("type"),
+        kilometrage = data.get("kilometrage"),
+        marque = data.get("marque"),
+        transmission = data.get("transmission"),
+        places = data.get("places")
+
+       )
+       db.session.add(new_vehicule)
+       db.session.commit()
+       return jsonify(new_vehicule.to_dict()),201
+
+#GET vehicule
+@app.route("/vehicule/<id>", methods =["GET"])
+@jwt_required()
+def get_vehicule(id):
+        response = Vehicule.query.get(id)
+        return jsonify(response.to_dict()),200
+
+#PUT -vehicule
+@app.route("/vehicule/<id>", methods =["PUT"])
+@jwt_required()
+def update_vehicule(id):
+        data= request.get_json()
+        vehicule_modify = Vehicule.query.get(id)
+        vehicule_modify.name = data.get("name")
+        vehicule_modify.description = data.get("description")
+        vehicule_modify.price = data.get("price")
+        vehicule_modify.type = data.get("type")
+        vehicule_modify.kilometrage = data.get("kilometrage")
+        vehicule_modify.marque = data.get("marque")
+        vehicule_modify.transmission = data.get("transmission")
+        vehicule_modify.places = data.get("places")
+
+        db.session.commit()
+        return jsonify(vehicule_modify.to_dict()),200
+
+#DELETE -vehicule
+@app.route("/vehicule/<id>" , methods =["DELETE"])
+@jwt_required()
+def delete_vehicule(id):
+       
+        vehicule_delete = Vehicule.query.get(id)
+        db.session.delete(vehicule_delete)
+        db.session.commit()
+        return "",204 
+
+
 @app.route("/register", methods =["GET","POST"])
 def register():
        if request.method == "POST":
