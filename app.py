@@ -69,10 +69,12 @@ def create_vehicule():
 
 #GET vehicule
 @app.route("/vehicule/<id>", methods =["GET"])
-@jwt_required()
 def get_vehicule(id):
+
         response = Vehicule.query.get(id)
-        return jsonify(response.to_dict()),200
+        if response is None:
+                return jsonify({"msg": "Véhicule introuvable"}), 404
+        return jsonify(response.to_dict()), 200
 
 #PUT -vehicule
 @app.route("/vehicule/<id>", methods =["PUT"])
@@ -153,7 +155,7 @@ def mon_compte():
 @jwt_required()
 def dossier() :
         data= request.get_json()
-        user_id =get_jwt_identity(),
+        user_id = int(get_jwt_identity())
         new_dossier = Dossier(
         user_id =user_id,
         vehicule_id = data.get("vehicule_id"),
