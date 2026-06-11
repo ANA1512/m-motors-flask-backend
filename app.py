@@ -198,6 +198,16 @@ def delete_files(id):
         db.session.commit()
         return "",204 
      
+#get client files
+@app.route("/dossier", methods =["GET"])
+@jwt_required()
+def get_all_clients_files():
+       user_id = int(get_jwt_identity())
+       print("user_id:", user_id, type(user_id))
+        
+       allFiles = Dossier.query.filter_by(user_id=user_id).all()
+       print("allFiles:", allFiles)
+       return jsonify([dossier.to_dict() for dossier in allFiles]),200
 
 
 if __name__ == "__main__":
