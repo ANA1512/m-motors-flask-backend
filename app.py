@@ -174,19 +174,6 @@ def show_files(id):
         response = Dossier.query.get(id)
         return jsonify(response.to_dict()),200
 
-#update
-@app.route("/dossier/<id>" , methods =["PUT"])
-@jwt_required()
-def update_files(id):
-        data= request.get_json()
-        dossier_modify = Dossier.query.get(id)
-        dossier_modify.vehicule_id = data.get("vehicule_id")
-        dossier_modify.type_financement = data.get("type_financement")
-        dossier_modify.revenu_mensuel = data.get("revenu_mensuel")
-        dossier_modify.statut = data.get("statut")
-       
-        db.session.commit()
-        return jsonify(dossier_modify.to_dict()),200
 
 #delete
 @app.route("/dossier/<id>" , methods =["DELETE"])
@@ -209,6 +196,43 @@ def get_all_clients_files():
        print("allFiles:", allFiles)
        return jsonify([dossier.to_dict() for dossier in allFiles]),200
 
+#ADMIN : get all client files
+
+@app.route("/admin/dossier", methods =["GET"])
+@jwt_required()
+def admin_all_clients_files():
+       user_id = int(get_jwt_identity())
+
+       clientAllFiles = Dossier.query.all()
+
+       bd_user_id = User.query.get(user_id)
+       role = bd_user_id.role
+
+       if bd_user_id.role != 'admin' :
+              return  jsonify({"message": "Aucun accès autorisé"}),401
+       else :
+              return jsonify([dossier.to_dict() for dossier in clientAllFiles]),201
+
+#PUT  dossier client/admin
+@app.route("/dossier/<id>", methods=["PUT"])
+@jwt_required()
+def update_dossier(id):
+    data = request.get_json()
+    dossier = db.session.get(Dossier, id)
+    
+    if "statut" in data:
+        dossier.statut = data["statut"]
+    if "vehicule_id" in data:
+        dossier.vehicule_id = data["vehicule_id"]
+    if "type_financement" in data:
+        dossier.type_financement = data["type_financement"]
+    if "revenu_mensuel" in data:
+        dossier.revenu_mensuel = data["revenu_mensuel"]
+    
+    db.session.commit()
+    return jsonify(dossier.to_dict()), 200
+       
+       
 
 if __name__ == "__main__":
     app.run(port=5001, debug= True)
