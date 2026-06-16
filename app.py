@@ -1,11 +1,12 @@
 from flask import Flask, jsonify, request
 #import variable db
-from models.models import db , Vehicule, User,Dossier
+from models.models import db , Vehicule, User,Dossier, Document
 #import flask-cors
 from flask_cors import CORS
 #env variable
 from dotenv import load_dotenv
 import os
+os.makedirs('uploads', exist_ok=True)
 load_dotenv()
 #routes protégées
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -13,7 +14,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 #create the app
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
 
 #import bcrypt and jwt
@@ -167,6 +168,7 @@ def dossier() :
         db.session.commit()
 
         return jsonify(new_dossier.to_dict()),201
+
 #read
 @app.route("/dossier/<id>", methods=["GET"])
 @jwt_required()
@@ -190,11 +192,14 @@ def delete_files(id):
 @jwt_required()
 def get_all_clients_files():
        user_id = int(get_jwt_identity())
-       print("user_id:", user_id, type(user_id))
-        
-       allFiles = Dossier.query.filter_by(user_id=user_id).all()
-       print("allFiles:", allFiles)
-       return jsonify([dossier.to_dict() for dossier in allFiles]),200
+       user = db.session.get(User, user_id)
+       
+       if user.role =="admin":
+          all_files= Dossier.query.all()
+       else :
+          all_files = Dossier.query.filter_by(user_id= user_id).all()
+      
+       return jsonify([dossier.to_dict() for dossier in all_files]),200
 
 #ADMIN : get all client files
 
@@ -212,6 +217,8 @@ def admin_all_clients_files():
               return  jsonify({"message": "Aucun accès autorisé"}),401
        else :
               return jsonify([dossier.to_dict() for dossier in clientAllFiles]),201
+       
+
 
 #PUT  dossier client/admin
 @app.route("/dossier/<id>", methods=["PUT"])
@@ -231,8 +238,39 @@ def update_dossier(id):
     
     db.session.commit()
     return jsonify(dossier.to_dict()), 200
+
+#route admin connected
+@app.route("/me", methods =["GET"])
+@jwt_required()
+def get_me() :
+      user_id =int(get_jwt_identity())
+      user = db.session.get(User,user_id)
+      return jsonify(user.to_dict()), 200
        
+#route upload doc for client files
+@app.route("/document", methods =["POST"])
+@jwt_required()
+def upload_doc():
+      file = request.files.get('file')
+      dossier_id =request.form.get('dossier_id')
+      doc_type = request.form.get('doc_type')
+      
+      filename =file.filename
+      filepath = os.path.join('uploads', filename)
+      file.save(filepath)
+     
+      new_doc = Document(
        
+        dossier_id = dossier_id,
+        doc_type =doc_type,
+        filename= filename,
+        filepath = filepath
+        )
+      
+      db.session.add(new_doc)
+      db.session.commit()
+      return jsonify(new_doc.to_dict()),201
+
 
 if __name__ == "__main__":
     app.run(port=5001, debug= True)

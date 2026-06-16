@@ -46,7 +46,8 @@ class User(db.Model):
         return{
             "id": self.id,
             "name": self.name,
-            "email": self.email
+            "email": self.email,
+            "role" :self.role
             
         }
     
@@ -68,3 +69,26 @@ class Dossier(db.Model):
             "revenu_mensuel": self.revenu_mensuel,
             "statut": self.statut
         }
+    
+#Model document
+class Document(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    dossier_id = db.Column(db.Integer, db.ForeignKey("dossier.id"), nullable=False)
+
+    doc_type = db.Column(db.String(100), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    filepath = db.Column(db.String(255), nullable=False)
+
+    uploaded_at = db.Column(db.DateTime)
+
+    def to_dict(self):
+        return {
+
+            "id" : self.id,
+            "doc_type" : self.doc_type,
+            "filename" : self.filename,
+            "filepath": self.filepath
+          
+        }
+
