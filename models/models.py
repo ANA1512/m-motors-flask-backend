@@ -1,7 +1,7 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer,String, Float,ForeignKey
-
+from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
 
 #variable interact with db from any files
@@ -56,8 +56,10 @@ class Dossier(db.Model):
     user_id : Mapped[int]=  mapped_column(ForeignKey("user.id"))
     vehicule_id : Mapped[int]=  mapped_column(ForeignKey("vehicule.id"))
     type_financement: Mapped[str] = mapped_column()
-    revenu_mensuel: Mapped[int]=  mapped_column()
+    revenu_mensuel: Mapped[Optional[int]] = mapped_column(nullable=True)
     statut: Mapped[str] = mapped_column()
+
+    documents = db.relationship("Document", backref="dossier", lazy=True)
 
     def to_dict(self):
         return {
@@ -67,7 +69,8 @@ class Dossier(db.Model):
             "vehicule_id" : self.vehicule_id,
             "type_financement": self.type_financement,
             "revenu_mensuel": self.revenu_mensuel,
-            "statut": self.statut
+            "statut": self.statut,
+            "documents": [doc.to_dict() for doc in self.documents]
         }
     
 #Model document
@@ -86,6 +89,7 @@ class Document(db.Model):
         return {
 
             "id" : self.id,
+            "dossier_id": self.dossier_id,
             "doc_type" : self.doc_type,
             "filename" : self.filename,
             "filepath": self.filepath

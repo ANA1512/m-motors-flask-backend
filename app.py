@@ -8,13 +8,19 @@ from dotenv import load_dotenv
 import os
 os.makedirs('uploads', exist_ok=True)
 load_dotenv()
+#route for admin access files 
+from flask import send_from_directory
+from flask_cors import cross_origin
 #routes protégées
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
+ 
 
 #create the app
+from flask_cors import CORS
+
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+
+CORS(app)
 
 
 #import bcrypt and jwt
@@ -162,7 +168,8 @@ def dossier() :
         vehicule_id = data.get("vehicule_id"),
         type_financement = data.get("type_financement"),
         revenu_mensuel = data.get("revenu_mensuel"),
-        statut = data.get("statut")
+        statut = data.get("statut"),
+      
         )
         db.session.add(new_dossier)
         db.session.commit()
@@ -178,14 +185,24 @@ def show_files(id):
 
 
 #delete
-@app.route("/dossier/<id>" , methods =["DELETE"])
+@app.route('/dossier/<int:id>', methods=['DELETE'])
 @jwt_required()
-def delete_files(id):
-       
-        dossier_delete = Dossier.query.get(id)
-        db.session.delete(dossier_delete)
-        db.session.commit()
-        return "",204 
+def delete_dossier(id):
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    
+    dossier = Dossier.query.get_or_404(id)
+    
+    # user ou admin peut supprimer dossier 
+    if dossier.user_id != current_user_id and current_user.role != "admin":
+        return jsonify({"message": "Non autorisé"}), 403
+    
+    for doc in dossier.documents:
+        db.session.delete(doc)
+    
+    db.session.delete(dossier)
+    db.session.commit()
+    return jsonify({"message": "Dossier supprimé"}), 200
      
 #get client files
 @app.route("/dossier", methods =["GET"])
@@ -270,6 +287,20 @@ def upload_doc():
       db.session.add(new_doc)
       db.session.commit()
       return jsonify(new_doc.to_dict()),201
+
+#route get admin doc client 
+@app.route("/dossiers/<int:dossier_id>/documents", methods=["GET"])
+@cross_origin()
+def get_documents_by_dossier(dossier_id):
+    documents = Document.query.filter_by(dossier_id=dossier_id).all()
+    print("DOSSIER :", dossier_id)
+    print("DOCUMENTS :", documents)
+    return jsonify([doc.to_dict() for doc in documents]), 200
+
+
+@app.route("/uploads/<filename>", methods=["GET"])
+def uploaded_file(filename):
+    return send_from_directory("uploads", filename)
 
 
 if __name__ == "__main__":
