@@ -45,6 +45,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 # initialize the app with the extension
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
 @app.route("/vehicules")
 def all_vehicules() :
         vehicules =Vehicule.query.all()
