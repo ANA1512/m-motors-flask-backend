@@ -52,22 +52,37 @@ def to_dict(self) :
             
         }
     
-class Dossier(db.Model): 
-    id : Mapped[int]=  mapped_column(primary_key=True)
-    user_id : Mapped[int]=  mapped_column(ForeignKey("user.id"),nullable=False)
-    vehicule_id : Mapped[int]=  mapped_column(ForeignKey("vehicule.id"))
+class Dossier(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    vehicule_id: Mapped[int] = mapped_column(
+        ForeignKey("vehicule.id")
+    )
+
     type_financement: Mapped[str] = mapped_column()
-    revenu_mensuel: Mapped[Optional[int]] = mapped_column(nullable=True)
+
+    revenu_mensuel: Mapped[Optional[int]] = mapped_column(
+        nullable=True
+    )
+
     statut: Mapped[str] = mapped_column()
 
-    documents = db.relationship("Document", backref="dossier", lazy=True)
+    documents = db.relationship(
+        "Document",
+        backref="dossier",
+        lazy=True
+    )
 
     def to_dict(self):
         return {
-
-            "id" : self.id,
-            "user_id" : self.user_id,
-            "vehicule_id" : self.vehicule_id,
+            "id": self.id,
+            "user_id": self.user_id,
+            "vehicule_id": self.vehicule_id,
             "type_financement": self.type_financement,
             "revenu_mensuel": self.revenu_mensuel,
             "statut": self.statut,
