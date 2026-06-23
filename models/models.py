@@ -36,22 +36,21 @@ class Vehicule(db.Model):
         }
     
 class User(db.Model):
-    __tablename__ = "users" 
-id = db.Column(db.Integer, primary_key=True)
-name = db.Column(db.String(100), unique=True)
-email = db.Column(db.String(120), unique=True)
-password = db.Column(db.String(255))
-role = db.Column(db.String(50), default="user")
+    __tablename__ = "users"
 
-def to_dict(self) :
-        return{
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    email: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str] = mapped_column()
+    role: Mapped[str] = mapped_column(default="user")
+
+    def to_dict(self):
+        return {
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "role" :self.role
-            
+            "role": self.role
         }
-    
 class Dossier(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
 
