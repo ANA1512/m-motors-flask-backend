@@ -25,7 +25,7 @@ def upgrade():
     sa.Column('type_financement', sa.String(), nullable=False),
     sa.Column('revenu_mensuel', sa.Integer(), nullable=False),
     sa.Column('statut', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id']),
     sa.ForeignKeyConstraint(['vehicule_id'], ['vehicule.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

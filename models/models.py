@@ -36,13 +36,14 @@ class Vehicule(db.Model):
         }
     
 class User(db.Model):
-    id : Mapped[int]=  mapped_column(primary_key=True)
-    name : Mapped[str] = mapped_column(unique=True)
-    email : Mapped[str] =  mapped_column(unique=True)
-    password: Mapped[str] = mapped_column()
-    role: Mapped[str] = mapped_column(default="user")
+    __tablename__ = "users" 
+id = db.Column(db.Integer, primary_key=True)
+name = db.Column(db.String(100), unique=True)
+email = db.Column(db.String(120), unique=True)
+password = db.Column(db.String(255))
+role = db.Column(db.String(50), default="user")
 
-    def to_dict(self) :
+def to_dict(self) :
         return{
             "id": self.id,
             "name": self.name,
@@ -53,7 +54,7 @@ class User(db.Model):
     
 class Dossier(db.Model): 
     id : Mapped[int]=  mapped_column(primary_key=True)
-    user_id : Mapped[int]=  mapped_column(ForeignKey("user.id"))
+    user_id : Mapped[int]=  mapped_column(ForeignKey("user.id"),nullable=False)
     vehicule_id : Mapped[int]=  mapped_column(ForeignKey("vehicule.id"))
     type_financement: Mapped[str] = mapped_column()
     revenu_mensuel: Mapped[Optional[int]] = mapped_column(nullable=True)
