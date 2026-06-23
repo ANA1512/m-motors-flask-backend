@@ -188,12 +188,11 @@ def show_files(id):
 @app.route('/dossier/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_dossier(id):
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())  # ← forcer en int
     current_user = User.query.get(current_user_id)
     
     dossier = Dossier.query.get_or_404(id)
     
-    # user ou admin peut supprimer dossier 
     if dossier.user_id != current_user_id and current_user.role != "admin":
         return jsonify({"message": "Non autorisé"}), 403
     
@@ -287,6 +286,22 @@ def upload_doc():
       db.session.add(new_doc)
       db.session.commit()
       return jsonify(new_doc.to_dict()),201
+
+#delete doc
+@app.route('/document/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_document(id):
+    current_user_id = int(get_jwt_identity())
+    doc = Document.query.get_or_404(id)
+    
+    # files belong to client 
+    dossier = Dossier.query.get(doc.dossier_id)
+    if dossier.user_id != current_user_id:
+        return jsonify({"message": "Non autorisé"}), 403
+    
+    db.session.delete(doc)
+    db.session.commit()
+    return jsonify({"message": "Document supprimé"}), 200
 
 #route get admin doc client 
 @app.route("/dossiers/<int:dossier_id>/documents", methods=["GET"])
