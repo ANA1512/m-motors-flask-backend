@@ -13,6 +13,18 @@ from flask import send_from_directory
 from flask_cors import cross_origin
 #routes protégées
 from flask_jwt_extended import jwt_required, get_jwt_identity
+
+import sentry_sdk
+from flask import Flask
+
+sentry_sdk.init(
+    dsn="https://279dc778bc8c309ddeef31e156e66ac7@o4511633338925056.ingest.de.sentry.io/4511633350393936",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
+
+app = Flask(__name__)
  
 
 #create the app
@@ -323,6 +335,10 @@ def get_documents_by_dossier(dossier_id):
 @app.route("/uploads/<filename>", methods=["GET"])
 def uploaded_file(filename):
     return send_from_directory("uploads", filename)
+
+#@app.route("/test-sentry")
+#def test_sentry():
+    #1/0
 
 
 if __name__ == "__main__":
