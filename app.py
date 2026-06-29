@@ -17,6 +17,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import sentry_sdk
 from flask import Flask
 
+from werkzeug.utils import secure_filename
+
 sentry_sdk.init(
     dsn="https://279dc778bc8c309ddeef31e156e66ac7@o4511633338925056.ingest.de.sentry.io/4511633350393936",
     # Add data like request headers and IP for users,
@@ -24,15 +26,25 @@ sentry_sdk.init(
     send_default_pii=True,
 )
 
-app = Flask(__name__)
- 
 
 #create the app
 from flask_cors import CORS
+app = Flask(__name__)
+CORS(
+      app, 
+      origins =[
+             "https://m-motors-react-frontend.netlify.app"
+             ]
+    )
 
-app = Flask(__name__)\
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg"}
 
-CORS(app, origins =["https://m-motors-react-frontend.netlify.app"])
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 #import bcrypt and jwt
@@ -286,15 +298,28 @@ def get_me() :
 @app.route("/document", methods =["POST"])
 @jwt_required()
 def upload_doc():
-      file = request.files.get('file')
-      dossier_id =request.form.get('dossier_id')
-      doc_type = request.form.get('doc_type')
+        file = request.files.get('file')
+        dossier_id =request.form.get('dossier_id')
+        doc_type = request.form.get('doc_type')
       
-      filename =file.filename
-      filepath = os.path.join('uploads', filename)
-      file.save(filepath)
+
+        if not file:
+            return jsonify({"message": "Aucun fichier envoyé"}), 400
+
+        if file.filename == "":
+            return jsonify({"message": "Nom de fichier vide"}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({"message": "Format non autorisé. Formats acceptés : PDF, PNG, JPG, JPEG"}), 400
+
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+        file.save(filepath)
      
-      new_doc = Document(
+        new_doc = Document(
        
         dossier_id = dossier_id,
         doc_type =doc_type,
@@ -302,9 +327,9 @@ def upload_doc():
         filepath = filepath
         )
       
-      db.session.add(new_doc)
-      db.session.commit()
-      return jsonify(new_doc.to_dict()),201
+        db.session.add(new_doc)
+        db.session.commit()
+        return jsonify(new_doc.to_dict()),201
 
 #delete doc
 @app.route('/document/<int:id>', methods=['DELETE'])
