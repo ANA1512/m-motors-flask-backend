@@ -146,7 +146,7 @@ def register():
                 name = data.get('name'),
                 email = email,
                 password = hashed_password,
-                role = data.get('role')
+                role = "client"
              )
         db.session.add(new_user)
         db.session.commit()
