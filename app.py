@@ -30,9 +30,9 @@ app = Flask(__name__)
 #create the app
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__)\
 
-CORS(app)
+CORS(app, origins =["https://m-motors-react-frontend.netlify.app"])
 
 
 #import bcrypt and jwt
